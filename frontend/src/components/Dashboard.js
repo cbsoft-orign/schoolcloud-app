@@ -1,30 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode'; // Changed from import jwtDecode
+import { getToken, getUserRole, logout } from '../utils/auth';
 import Timetable from './Timetable';
 
 const Dashboard = () => {
   const [timetables, setTimetables] = useState([]);
-  const [user, setUser] = useState(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const userRole = getUserRole();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = getToken();
     if (!token) {
       navigate('/login');
       return;
     }
 
-    try {
-      const decoded = jwtDecode(token); // Use named export
-      setUser(decoded);
-      fetchTimetables(token);
-    } catch (err) {
-      setError('Invalid token');
-      navigate('/login');
-    }
+    fetchTimetables(token);
   }, [navigate]);
 
   const fetchTimetables = async (token) => {
@@ -39,15 +32,14 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
+    logout(navigate);
   };
 
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
-          {user ? `${user.role.charAt(0).toUpperCase() + user.role.slice(1)} Dashboard` : 'Dashboard'}
+          {userRole ? `${userRole.charAt(0).toUpperCase() + userRole.slice(1)} Dashboard` : 'Dashboard'}
         </h1>
         <button
           onClick={handleLogout}
