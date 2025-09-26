@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getToken, getUserRole, logout } from '../utils/auth';
 import Timetable from './Timetable';
+import TimetableForm from './TimetableForm';
 
 const Dashboard = () => {
   const [timetables, setTimetables] = useState([]);
@@ -16,7 +17,6 @@ const Dashboard = () => {
       navigate('/login');
       return;
     }
-
     fetchTimetables(token);
   }, [navigate]);
 
@@ -29,6 +29,10 @@ const Dashboard = () => {
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to fetch timetables');
     }
+  };
+
+  const handleTimetableCreated = () => {
+    fetchTimetables(getToken());
   };
 
   const handleLogout = () => {
@@ -49,6 +53,9 @@ const Dashboard = () => {
         </button>
       </div>
       {error && <p className="text-sm text-red-600 mb-4">{error}</p>}
+      {(userRole === 'teacher' || userRole === 'admin') && (
+        <TimetableForm onTimetableCreated={handleTimetableCreated} />
+      )}
       <Timetable timetables={timetables} />
     </div>
   );
